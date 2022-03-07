@@ -206,3 +206,83 @@ variable "assign_ipv6_address_on_creation" {
   description = "Specify true to indicate that network interfaces created in the specified subnet should be assigned an IPv6 address."
 
 }
+
+
+variable "egress" {
+  type = list(any)
+}
+
+variable "action" {
+  type = string
+  default = null
+}
+
+variable "rule_no" {
+  type = number
+  default = null
+}
+
+variable "from_port" {
+  type = number
+  default = null
+}
+
+variable "to_port" {
+  type = number
+  default = null
+}
+
+variable "protocol" {
+  type = string
+  default = null
+}
+
+#variable "egress" {
+#  type = list(object({
+#    action  = string
+#    rule_no = number
+#    cidr_block = list(string)
+#    from_port  = number
+#    to_port    = number
+#    protocol   = string
+#  }))
+#  default = null
+#}
+
+variable "ingress" {
+  type = list(object({
+    action  = string
+    rule_no = number
+    cidr_block = list(string)
+    from_port  = number
+    to_port    = number
+    protocol   = string
+  }))
+  default = null
+}
+
+variable "egress-private" {
+  type = list(object({
+    action  = list(string)
+    rule_no = number
+    cidr_block = string
+    from_port  = number
+    to_port    = number
+    protocol   = string
+  }))
+  default = null
+}
+
+variable "ingress-private" {
+  type = list(object({
+    action  = list(string)
+    rule_no = number
+    cidr_block = string
+    from_port  = number
+    to_port    = number
+    protocol   = string
+  }))
+  default = null
+}
+
+

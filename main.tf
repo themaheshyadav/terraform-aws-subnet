@@ -96,43 +96,38 @@ resource "aws_network_acl" "public" {
   vpc_id     = var.vpc_id
   subnet_ids = aws_subnet.public.*.id
 
-  egress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
+
+  dynamic "egress" {
+    for_each = var.egress == null ? [] : var.egress
+    content {
+      rule_no    = lookup(egress.value, "rule_no", null )
+      action     = lookup(egress.value, "action", null )
+      cidr_block = lookup(egress.value, "cidr_block", null )
+      from_port  = lookup(egress.value, "from_port", null )
+      to_port    = lookup(egress.value, "to_port", null )
+      protocol   = lookup(egress.value, "protocol", null )
+    }
+    }
+
+  dynamic "ingress" {
+    for_each = var.ingress == null ? [] : var.ingress
+    content {
+      rule_no    = ingress.value.rule_no
+      action     = ingress.value.action
+      cidr_block = lookup(ingress.value.cidr_block, "cidr_block", null )
+      from_port  = ingress.value.from_port
+      to_port    = ingress.value.to_port
+      protocol   = ingress.value.protocol
+    }
   }
 
-  egress {
-    rule_no         = 101
-    action          = "allow"
-    ipv6_cidr_block = "::/0"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-  }
 
-  ingress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
-  }
-
-  ingress {
-    rule_no         = 101
-    action          = "allow"
-    ipv6_cidr_block = "::/0"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-  }
-
-  tags       = module.public-labels.tags
+  tags = merge(
+    module.public-labels.tags,
+    {
+      "name" = format("%s%s%s", module.public-labels.id, var.delimiter, "public-acl" )
+    }
+  )
   depends_on = [aws_subnet.public]
 }
 
@@ -148,9 +143,11 @@ resource "aws_route_table" "public" {
     {
       "Name" = format("%s%s%s-rt", module.public-labels.id, var.delimiter, element(var.availability_zones, count.index))
       "AZ"   = element(var.availability_zones, count.index)
-    }
+    },
+    var.tags
   )
 }
+
 
 #Module      : ROUTE
 #Description : Provides a resource to create a routing table entry (a route) in a VPC
@@ -203,7 +200,7 @@ resource "aws_flow_log" "flow_log" {
   tags = merge(
     module.public-labels.tags,
     {
-      "Name" = format("%s-flowlog", module.public-labels.name)
+      "Name" = format("%s-flowlog-public", module.public-labels.name)
     }
   )
 }
@@ -260,44 +257,38 @@ resource "aws_network_acl" "private" {
   vpc_id     = var.vpc_id
   subnet_ids = aws_subnet.private.*.id
 
-  egress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
+  dynamic "egress" {
+    for_each = var.egress-private == null ? [] : var.egress-private
+    content {
+      rule_no    = egress.value.rule_no
+      action     = egress.value.action
+      cidr_block = egress.value.cidr_block
+      from_port  = egress.value.from_port
+      to_port    = egress.value.to_port
+      protocol   = egress.value.protocol
+    }
   }
 
-  egress {
-    rule_no         = 101
-    action          = "allow"
-    ipv6_cidr_block = "::/0"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
+  dynamic "ingress" {
+    for_each = var.ingress-private == null ? [] : var.ingress-private
+    content {
+      rule_no    = ingress.value.rule_no
+      action     = ingress.value.action
+      cidr_block = ingress.value.cidr_block
+      from_port  = ingress.value.from_port
+      to_port    = ingress.value.to_port
+      protocol   = ingress.value.protocol
+    }
   }
+    tags = merge(
+      module.private-labels.tags,
+      {
+        "name" = format("%s%s%s", module.public-labels.id, var.delimiter, "private-acl" )
+      }
+    )
 
-  ingress {
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-    protocol   = "-1"
-  }
+    depends_on = [aws_subnet.private]
 
-  ingress {
-    rule_no         = 101
-    action          = "allow"
-    ipv6_cidr_block = "::/0"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-  }
-
-  tags       = module.private-labels.tags
-  depends_on = [aws_subnet.private]
 }
 
 #Module      : ROUTE TABLE
@@ -386,7 +377,7 @@ resource "aws_flow_log" "private_subnet_flow_log" {
   tags = merge(
     module.private-labels.tags,
     {
-      "Name" = format("%s-flowlog", module.private-labels.name)
+      "Name" = format("%s-flowlog-private", module.private-labels.name)
     }
   )
 }

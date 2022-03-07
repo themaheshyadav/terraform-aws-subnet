@@ -29,4 +29,41 @@ module "private-subnets" {
   ipv6_cidr_block                 = module.vpc.ipv6_cidr_block
   public_subnet_ids               = ["subnet-XXXXXXXXXXXXX", "subnet-XXXXXXXXXXXXX"]
   assign_ipv6_address_on_creation = false
+  egress-private = [
+    {
+      rule_no    = 100
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 0
+      to_port    = 0
+      protocol   = "-1"
+    },
+    {
+      rule_no         = 101
+      action          = "allow"
+      ipv6_cidr_block = "::/0"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "-1"
+    }
+  ]
+
+  ingress-private = [
+    {
+      rule_no    = 100
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 0
+      to_port    = 0
+      protocol   = "-1"
+    },
+    {
+      rule_no         = 101
+      action          = "allow"
+      ipv6_cidr_block = "::/0"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "-1"
+    }
+  ]
 }
