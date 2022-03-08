@@ -29,7 +29,7 @@ module "private-subnets" {
   ipv6_cidr_block                 = module.vpc.ipv6_cidr_block
   public_subnet_ids               = ["subnet-XXXXXXXXXXXXX", "subnet-XXXXXXXXXXXXX"]
   assign_ipv6_address_on_creation = false
-  egress-private = [
+  egress_private = [
     {
       rule_no    = 100
       action     = "allow"
@@ -48,7 +48,7 @@ module "private-subnets" {
     }
   ]
 
-  ingress-private = [
+  ingress_private = [
     {
       rule_no    = 100
       action     = "allow"

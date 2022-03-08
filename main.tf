@@ -98,26 +98,26 @@ resource "aws_network_acl" "public" {
 
 
   dynamic "egress" {
-    for_each = var.egress == null ? [] : var.egress
+    for_each = var.egress_public == null ? [] : var.egress_public
     content {
-      rule_no    = lookup(egress.value, "rule_no", null )
-      action     = lookup(egress.value, "action", null )
-      cidr_block = lookup(egress.value, "cidr_block", null )
-      from_port  = lookup(egress.value, "from_port", null )
-      to_port    = lookup(egress.value, "to_port", null )
-      protocol   = lookup(egress.value, "protocol", null )
+      rule_no    = lookup(egress.value, "rule_no", 100)
+      action     = lookup(egress.value, "action", "allow")
+      cidr_block = lookup(egress.value, "cidr_block", "0.0.0.0/0")
+      from_port  = lookup(egress.value, "from_port", 0)
+      to_port    = lookup(egress.value, "to_port", 0)
+      protocol   = lookup(egress.value, "protocol", "-1")
     }
-    }
+  }
 
   dynamic "ingress" {
-    for_each = var.ingress == null ? [] : var.ingress
+    for_each = var.ingress_public == null ? [] : var.ingress_public
     content {
-      rule_no    = ingress.value.rule_no
-      action     = ingress.value.action
-      cidr_block = lookup(ingress.value.cidr_block, "cidr_block", null )
-      from_port  = ingress.value.from_port
-      to_port    = ingress.value.to_port
-      protocol   = ingress.value.protocol
+      rule_no    = lookup(ingress.value, "rule_no", 101)
+      action     = lookup(ingress.value, "action", "allow")
+      cidr_block = lookup(ingress.value, "cidr_block", "0.0.0.0/0")
+      from_port  = lookup(ingress.value, "from_port", 0)
+      to_port    = lookup(ingress.value, "to_port", 0)
+      protocol   = lookup(ingress.value, "protocol", "-1")
     }
   }
 
@@ -125,7 +125,7 @@ resource "aws_network_acl" "public" {
   tags = merge(
     module.public-labels.tags,
     {
-      "name" = format("%s%s%s", module.public-labels.id, var.delimiter, "public-acl" )
+      "name" = format("%s%s%s", module.public-labels.id, var.delimiter, "public-acl")
     }
   )
   depends_on = [aws_subnet.public]
@@ -149,7 +149,7 @@ resource "aws_route_table" "public" {
 }
 
 
-#Module      : ROUTE
+#Module      : ROUTEcustomer_owned_ipv4_pool
 #Description : Provides a resource to create a routing table entry (a route) in a VPC
 #              routing table.
 resource "aws_route" "public" {
@@ -258,36 +258,36 @@ resource "aws_network_acl" "private" {
   subnet_ids = aws_subnet.private.*.id
 
   dynamic "egress" {
-    for_each = var.egress-private == null ? [] : var.egress-private
+    for_each = var.egress_private == null ? [] : var.egress_private
     content {
-      rule_no    = egress.value.rule_no
-      action     = egress.value.action
-      cidr_block = egress.value.cidr_block
-      from_port  = egress.value.from_port
-      to_port    = egress.value.to_port
-      protocol   = egress.value.protocol
+      rule_no    = lookup(egress.value, "rule_no", 100)
+      action     = lookup(egress.value, "action", "allow")
+      cidr_block = lookup(egress.value, "cidr_block", "0.0.0.0/0")
+      from_port  = lookup(egress.value, "from_port", 0)
+      to_port    = lookup(egress.value, "to_port", 0)
+      protocol   = lookup(egress.value, "protocol", "-1")
     }
   }
 
   dynamic "ingress" {
-    for_each = var.ingress-private == null ? [] : var.ingress-private
+    for_each = var.ingress_private == null ? [] : var.ingress_private
     content {
-      rule_no    = ingress.value.rule_no
-      action     = ingress.value.action
-      cidr_block = ingress.value.cidr_block
-      from_port  = ingress.value.from_port
-      to_port    = ingress.value.to_port
-      protocol   = ingress.value.protocol
+      rule_no    = lookup(ingress.value, "rule_no", 101)
+      action     = lookup(ingress.value, "action", "allow")
+      cidr_block = lookup(ingress.value, "cidr_block", "0.0.0.0/0")
+      from_port  = lookup(ingress.value, "from_port", 0)
+      to_port    = lookup(ingress.value, "to_port", 0)
+      protocol   = lookup(ingress.value, "protocol", "-1")
     }
   }
-    tags = merge(
-      module.private-labels.tags,
-      {
-        "name" = format("%s%s%s", module.public-labels.id, var.delimiter, "private-acl" )
-      }
-    )
+  tags = merge(
+    module.private-labels.tags,
+    {
+      "name" = format("%s%s%s", module.public-labels.id, var.delimiter, "private-acl")
+    }
+  )
 
-    depends_on = [aws_subnet.private]
+  depends_on = [aws_subnet.private]
 
 }
 

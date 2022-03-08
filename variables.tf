@@ -207,82 +207,21 @@ variable "assign_ipv6_address_on_creation" {
 
 }
 
-
-variable "egress" {
-  type = list(any)
+variable "egress_public" {
+  type    = list(any)
+  default = []
 }
 
-variable "action" {
-  type = string
-  default = null
+variable "ingress_public" {
+  type    = list(any)
+  default = []
+}
+variable "egress_private" {
+  type    = list(any)
+  default = []
 }
 
-variable "rule_no" {
-  type = number
-  default = null
+variable "ingress_private" {
+  type    = list(any)
+  default = []
 }
-
-variable "from_port" {
-  type = number
-  default = null
-}
-
-variable "to_port" {
-  type = number
-  default = null
-}
-
-variable "protocol" {
-  type = string
-  default = null
-}
-
-#variable "egress" {
-#  type = list(object({
-#    action  = string
-#    rule_no = number
-#    cidr_block = list(string)
-#    from_port  = number
-#    to_port    = number
-#    protocol   = string
-#  }))
-#  default = null
-#}
-
-variable "ingress" {
-  type = list(object({
-    action  = string
-    rule_no = number
-    cidr_block = list(string)
-    from_port  = number
-    to_port    = number
-    protocol   = string
-  }))
-  default = null
-}
-
-variable "egress-private" {
-  type = list(object({
-    action  = list(string)
-    rule_no = number
-    cidr_block = string
-    from_port  = number
-    to_port    = number
-    protocol   = string
-  }))
-  default = null
-}
-
-variable "ingress-private" {
-  type = list(object({
-    action  = list(string)
-    rule_no = number
-    cidr_block = string
-    from_port  = number
-    to_port    = number
-    protocol   = string
-  }))
-  default = null
-}
-
-
